@@ -47,6 +47,17 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
           }));
 
       new Setting(containerEl)
+        .setName('Day Planner File Name Format')
+        .setDesc('File Name format (insert date in {{data:moment format}})')
+        .addText(component =>
+          component
+            .setValue(this.plugin.settings.dayPlannerFileName)
+            .onChange((value) => {
+                this.plugin.settings.dayPlannerFileName = value;
+                this.plugin.saveData(this.plugin.settings);
+            }));
+
+      new Setting(containerEl)
         .setName('Complete past planner items')
         .setDesc('The plugin will automatically mark checkboxes for tasks and breaks in the past as complete')
         .addToggle(toggle =>
