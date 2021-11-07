@@ -1,6 +1,7 @@
 export class DayPlannerSettings {
   customFolder: string = 'Day Planners';
   dayPlannerFileName: string = 'Day Planner-{{date}}.md';
+  templaterFile: string = '';
   mode: DayPlannerMode = DayPlannerMode.File;
   mermaid: boolean = false;
   notesToDates: NoteForDate[] = [];
