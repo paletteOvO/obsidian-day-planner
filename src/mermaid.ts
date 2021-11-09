@@ -1,5 +1,7 @@
 import type { PlanItem, PlanSummaryData } from './plan-data';
+
 import type Progress from './progress';
+
 const moment = (window as any).moment;
 
 interface Replacement {
@@ -7,7 +9,7 @@ interface Replacement {
     replacement: string;
 }
 const mermaidEscapedCharacters: Replacement[] = [
-    //Escape characters are not currently supported for Mermaid Gantt
+    // Escape characters are not currently supported for Mermaid Gantt
     { key: ';', replacement:'' },
     { key: ':', replacement:'' },
     { key: '#', replacement:'' },
@@ -52,7 +54,7 @@ export default class PlannerMermaid {
     }
 
     private escape(input: string){
-        mermaidEscapedCharacters.forEach(mec => {  
+        mermaidEscapedCharacters.forEach(mec => {
             const regex = new RegExp(mec.key, 'g');
             input = input.replace(regex, mec.replacement)
         });
@@ -60,12 +62,10 @@ export default class PlannerMermaid {
     }
 
     private mermaidTemplate(tasks: string[], breaks: string[]):string {
-        const now = new Date();
         return `\`\`\`mermaid
 gantt
-    dateFormat  HH-mm
+    dateFormat HH:mm
     axisFormat %H:%M
-    %% Current Time: ${now.toLocaleTimeString()}
     section Tasks
 ${tasks.join('\n')}
     section Breaks
