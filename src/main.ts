@@ -76,6 +76,21 @@ export default class DayPlanner extends Plugin {
     });
 
     this.addCommand({
+      id: 'app:generate-mermaid-gantt-chart-current',
+      name: 'Generate Mermaid Gantt Chart for Current Note',
+      editorCallback: async () => {
+         console.log('Generating Mermaid Gantt Chart for Current Note');
+         const view = this.app.workspace.activeLeaf.view;
+         const filePath = view.getState().file;
+         const planSummary = await this.plannerMD.parseDayPlanner(filePath);
+         planSummary.calculate();
+         await this.statusBar.refreshStatusBar(planSummary);
+         await this.plannerMD.updateDayPlannerMarkdown(filePath, planSummary);
+      },
+      hotkeys: []
+    });
+
+    this.addCommand({
       id: 'app:show-day-planner-today-note',
       name: 'Show today\'s Day Planner',
       callback: () => this.app.workspace.openLinkText(this.file.todayPlannerFilePath(), '', true),
@@ -94,10 +109,11 @@ export default class DayPlanner extends Plugin {
         try {
           if(this.file.hasTodayNote()){
             // console.log('Active note found, starting file processing')
-            const planSummary = await this.plannerMD.parseDayPlanner();
+            const filePath = this.file.todayPlannerFilePath();
+            const planSummary = await this.plannerMD.parseDayPlanner(filePath);
             planSummary.calculate();
-            await this.statusBar.refreshStatusBar(planSummary)
-            await this.plannerMD.updateDayPlannerMarkdown(planSummary)
+            await this.statusBar.refreshStatusBar(planSummary);
+            await this.plannerMD.updateDayPlannerMarkdown(filePath, planSummary);
             this.timelineView && this.timelineView.update(planSummary);
           } else{
             // console.log('No active note, skipping file processing')

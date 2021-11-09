@@ -37,9 +37,8 @@ export default class PlannerMarkdown {
         this.file.updateFile(filePath, insertResult.join('\n'));
     }
 
-    async parseDayPlanner():Promise<PlanSummaryData> {
+    async parseDayPlanner(filePath: string):Promise<PlanSummaryData> {
         try {
-            const filePath = this.file.todayPlannerFilePath();
             const fileContent = await (await this.file.getFileContents(filePath)).split('\n');
 
             const planData = await this.parser.parseMarkdown(fileContent);
@@ -49,12 +48,8 @@ export default class PlannerMarkdown {
         }
     }
 
-    async updateDayPlannerMarkdown(planSummary: PlanSummaryData) {
-        if((this.dayPlannerLastEdit + 6000) > new Date().getTime()) {
-            return;
-        }
+    async updateDayPlannerMarkdown(filePath: string, planSummary: PlanSummaryData) {
         try {
-            const filePath = this.file.todayPlannerFilePath();
             const fileContents = await (await this.file.getFileContents(filePath))
             const fileContentsArr = fileContents.split('\n');
 

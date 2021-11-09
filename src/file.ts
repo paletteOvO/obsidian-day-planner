@@ -36,11 +36,11 @@ export default class DayPlannerFile {
         return this.momentDateRegex.replace(this.settings.dayPlannerFileName);
     }
 
-    async prepareFile() {
+    async prepareFile(filepath: string = this.todayPlannerFilePath()) {
         try {
             if(this.settings.mode === DayPlannerMode.File){
                 await this.createFolderIfNotExists(this.settings.customFolder);
-                await this.createFileIfNotExists(this.todayPlannerFilePath());
+                await this.createFileIfNotExists(filepath);
             }
         } catch (error) {
             console.log(error)
@@ -88,16 +88,16 @@ export default class DayPlannerFile {
     }
 
     async getFileContents(fileName: string){
-        await this.prepareFile();
+        await this.prepareFile(normalizePath(fileName));
         try {
-            return await this.vault.adapter.read(fileName);
+            return await this.vault.adapter.read(normalizePath(fileName));
         } catch (error) {
             console.log(error)
         }
     }
 
     async updateFile(fileName: string, fileContents: string){
-        await this.prepareFile();
+        await this.prepareFile(normalizePath(fileName));
         try {
             return await this.vault.adapter.write(normalizePath(fileName), fileContents);
         } catch (error) {
