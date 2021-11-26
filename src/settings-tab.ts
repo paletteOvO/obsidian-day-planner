@@ -48,7 +48,7 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
 
       new Setting(containerEl)
         .setName('Day Planner File Name Format')
-        .setDesc('File Name format (insert date in {{data:moment format}})')
+        .setDesc('File Name format (Date should be inputed in the moment format. eg. {{date:DD-MM-YYYY}}')
         .addText(component =>
           component
             .setValue(this.plugin.settings.dayPlannerFileName)
