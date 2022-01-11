@@ -50,17 +50,27 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
           });
       });
 
-    new Setting(containerEl)
+    const nameFormat = new Setting(containerEl)
       .setName("Day Planner File Name Format")
-      .setDesc("File Name format (insert date in {{data:moment format}})")
-      .addText((component) =>
-        component
-          .setValue(this.plugin.settings.dayPlannerFileName)
-          .onChange((value) => {
-            this.plugin.settings.dayPlannerFileName = value;
-            this.plugin.saveData(this.plugin.settings);
-          })
+      .setDesc(
+        `File Name format (insert date in {{data:moment format}})\nYour current syntax looks like this: ${new MomentDateRegex().replace(
+          this.plugin.settings.dayPlannerFileName
+        )}`
       );
+    nameFormat.addText((component) =>
+      component
+        .setValue(this.plugin.settings.dayPlannerFileName)
+        .onChange((value) => {
+          this.plugin.settings.dayPlannerFileName = value;
+          this.plugin.saveData(this.plugin.settings);
+
+          nameFormat.setDesc(
+            `File Name format (insert date in {{data:moment format}})\nYour current syntax looks like this: ${new MomentDateRegex().replace(
+              this.plugin.settings.dayPlannerFileName
+            )}`
+          );
+        })
+    );
 
     new Setting(containerEl)
       .setName("Day Planner Templater File")
