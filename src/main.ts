@@ -79,13 +79,13 @@ export default class DayPlanner extends Plugin {
       id: 'app:generate-mermaid-gantt-chart-current',
       name: 'Generate Mermaid Gantt Chart for Current Note',
       editorCallback: async () => {
-         // console.log('Generating Mermaid Gantt Chart for Current Note');
-         const view = this.app.workspace.activeLeaf.view;
-         const filePath = view.getState().file;
-         const planSummary = await this.plannerMD.parseDayPlanner(filePath);
-         planSummary.calculate();
-         await this.statusBar.refreshStatusBar(planSummary);
-         await this.plannerMD.updateDayPlannerMarkdown(filePath, planSummary);
+        // console.log('Generating Mermaid Gantt Chart for Current Note');
+        const view = this.app.workspace.activeLeaf.view;
+        const filePath = view.getState().file;
+        const planSummary = await this.plannerMD.parseDayPlanner(filePath);
+        planSummary.calculate();
+        await this.statusBar.refreshStatusBar(planSummary);
+        await this.plannerMD.updateDayPlannerMarkdown(filePath, planSummary);
       },
       hotkeys: []
     });

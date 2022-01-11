@@ -9,7 +9,7 @@ export class PlanSummaryData {
     past: PlanItem[];
     current: PlanItem;
     next: PlanItem;
-    
+
     constructor(items: PlanItem[]){
         this.empty = items.length < 1;
         this.invalid = false;
@@ -63,8 +63,9 @@ export class PlanItem {
     text: string;
     raw: string;
 
-    constructor(matchIndex: number, charIndex: number, isCompleted: boolean, 
-        isBreak: boolean, isEnd: boolean, time: Date, rawTime:string, text: string, raw: string){
+    constructor(matchIndex: number, charIndex: number, isCompleted: boolean,
+        isBreak: boolean, isEnd: boolean, time: Date, rawTime:string, text: string, raw: string) {
+        this.isPast = false;
         this.matchIndex = matchIndex;
         this.charIndex = charIndex;
         this.isCompleted = isCompleted;

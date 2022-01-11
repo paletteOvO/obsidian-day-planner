@@ -40,7 +40,6 @@ export default class PlannerMarkdown {
     async parseDayPlanner(filePath: string):Promise<PlanSummaryData> {
         try {
             const fileContent = await (await this.file.getFileContents(filePath)).split('\n');
-
             const planData = await this.parser.parseMarkdown(fileContent);
             return planData;
         } catch (error) {
@@ -91,7 +90,7 @@ export default class PlannerMarkdown {
         if(!this.settings.completePastItems) {
             check = this.check(item.isCompleted);
         }
-        return `- [${check}] ${item.rawTime} ${item.text}`;
+        return item.raw.replace(/\[[x ]\]/, `[${check}]`);
     }
 
     private check(check: boolean) {

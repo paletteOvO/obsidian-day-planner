@@ -1,9 +1,9 @@
 export const DEFAULT_DATE_FORMAT = 'YYYYMMDD';
 export const DATE_REGEX = /(?<target>{{date:?(?<date>[^}]*)}})/g;
 
-//https://regex101.com/r/VAxRnc/8
-export const PLAN_PARSER_REGEX_CREATOR = (breakLabel: string, endLabel: string) =>
-  new RegExp('^(((-?[\\s]*\\[?(?<completion>[x ]*)\\])(\\d.)?\\s*?(?<hours>\\d{1,2}):(?<minutes>\\d{2})\\s)((?<break>' + breakLabel + '[\\n ]?)|(?<end>' + endLabel + '[\\n ]?)|((?<text>.*))))$', 'gmi');
+// https://regex101.com/r/YWWsJU/1
+export const PLAN_PARSER_REGEX = /^(?<check>\s*-\s*\[(?<completion>[x ])\]\s*)(?<hours>\d{1,2}):(?<minutes>\d{1,2})\s*(?<text>.*)$/gmi;
+
 
 export const MERMAID_REGEX = /```mermaid\ngantt[\S\s]*?```\s*/gmi;
 

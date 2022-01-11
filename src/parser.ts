@@ -1,15 +1,15 @@
-import { PLAN_PARSER_REGEX_CREATOR } from './constants';
+import { PLAN_PARSER_REGEX } from './constants';
 import { PlanItem, PlanItemFactory, PlanSummaryData } from './plan-data';
 import type { DayPlannerSettings } from './settings';
 
 export default class Parser {
 
     private planItemFactory: PlanItemFactory;
-    private PLAN_PARSER_REGEX: RegExp;
+    private settings: DayPlannerSettings;
 
     constructor(settings: DayPlannerSettings) {
+        this.settings = settings;
         this.planItemFactory = new PlanItemFactory(settings);
-        this.PLAN_PARSER_REGEX = PLAN_PARSER_REGEX_CREATOR(settings.breakLabel, settings.endLabel);
     }
 
     async parseMarkdown(fileContent: string[]): Promise<PlanSummaryData> {
@@ -23,7 +23,7 @@ export default class Parser {
             const matches: {index: number, value: RegExpExecArray}[] = [];
             let match;
             input.forEach((line, i) => {
-                while(match = this.PLAN_PARSER_REGEX.exec(line)){
+                while(match = PLAN_PARSER_REGEX.exec(line)){
                     matches.push({index:i, value: match});
                 }
             });
@@ -38,19 +38,19 @@ export default class Parser {
             try {
                 const value = match.value;
                 const isCompleted = this.matchValue(value.groups.completion, 'x');
-                const isBreak = value.groups.break !== undefined;
-                const isEnd = value.groups.end !== undefined;
+                const isBreak = this.matchValue(value.groups.text, this.settings.breakLabel);
+                const isEnd = this.matchValue(value.groups.text, this.settings.endLabel)
                 const time = new Date();
                 time.setHours(parseInt(value.groups.hours))
                 time.setMinutes(parseInt(value.groups.minutes))
                 time.setSeconds(0);
                 return this.planItemFactory.getPlanItem(
-                    match.index, 
-                    value.index, 
-                    isCompleted, 
+                    match.index,
+                    value.index,
+                    isCompleted,
                     isBreak,
                     isEnd,
-                    time, 
+                    time,
                     `${value.groups.hours.padStart(2, '0')}:${value.groups.minutes}`,
                     value.groups.text?.trim(),
                     value[0]
@@ -65,5 +65,4 @@ export default class Parser {
     private matchValue(input: any, match: string): boolean {
         return input?.trim().toLocaleLowerCase() === match;
     }
-
 }
