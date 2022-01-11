@@ -36,9 +36,9 @@ export default class PlannerMermaid {
     items.forEach((item, i) => {
       const next = items[i + 1];
       const mins = this.minuteInterval(item, next);
-      const text = `    ${this.escape(item.text).replace(/%%.*/, "")}    :${
-        item.rawTime
-      }, ${mins}`;
+      const text = `    ${this.escape(item.text)
+        .replaceAll(/%%(.(?!%%).)*%%/g, "")
+        .replace(/%%.*/, "")}    :${item.rawTime}, ${mins}`;
       if (item.isBreak) {
         breaks.push(text);
       } else {
