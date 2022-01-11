@@ -39,4 +39,5 @@ export class DayPlannerSettings {
   timelineIcon: string = "calendar-with-checkmark";
   breakLabel: string = "BREAK";
   endLabel: string = "END";
+  mermaidIdentifier: string = "# Day Planners";
 }

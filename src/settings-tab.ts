@@ -4,6 +4,7 @@ import type DayPlanner from "./main";
 import { DayPlannerMode } from "./settings";
 import { ICONS } from "./constants";
 import MomentDateRegex from "./moment-date-regex";
+import { FileSuggest, FolderSuggest } from "./suggesters/file-suggest";
 
 export class DayPlannerSettingsTab extends PluginSettingTab {
   momentDateRegex = new MomentDateRegex();
@@ -39,14 +40,15 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Day Planner Folder")
       .setDesc("Where the planner file should saved")
-      .addText((component) =>
+      .addText((component) => {
+        new FolderSuggest(this.app, component.inputEl).open(containerEl);
         component
           .setValue(this.plugin.settings.customFolder)
           .onChange((value: string) => {
             this.plugin.settings.customFolder = value;
             this.plugin.saveData(this.plugin.settings);
-          })
-      );
+          });
+      });
 
     new Setting(containerEl)
       .setName("Day Planner File Name Format")
@@ -66,6 +68,7 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
         "Templater File (require templater plugin, will use default template if empty)"
       )
       .addText((component) => {
+        new FileSuggest(this.app, component.inputEl).open(containerEl);
         return component
           .setValue(this.plugin.settings.templaterFile)
           .onChange((value) => {
@@ -96,6 +99,18 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.mermaid)
           .onChange((value: boolean) => {
             this.plugin.settings.mermaid = value;
+            this.plugin.saveData(this.plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Mermaid Gantt Identifier")
+      .setDesc("Where the a mermaid gantt chart should inserted")
+      .addText((component) =>
+        component
+          .setValue(this.plugin.settings.mermaidIdentifier)
+          .onChange((value: string) => {
+            this.plugin.settings.mermaidIdentifier = value;
             this.plugin.saveData(this.plugin.settings);
           })
       );

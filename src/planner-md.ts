@@ -101,8 +101,8 @@ export default class PlannerMarkdown {
     const noMatch = input.match(MERMAID_REGEX) === null;
     if (noMatch) {
       return input.replace(
-        "# Day Planner\n",
-        `# Day Planner\n${mermaidResult}`
+        `${this.settings.mermaidIdentifier}\n`,
+        `${this.settings.mermaidIdentifier}\n${mermaidResult}`
       );
     }
     const replaced = input.replace(MERMAID_REGEX, mermaidResult);
