@@ -1,110 +1,135 @@
-import { DAY_PLANNER_DEFAULT_CONTENT, MERMAID_REGEX } from './constants';
-import { DayPlannerSettings, NoteForDateQuery } from './settings';
-import type { MarkdownView, Workspace } from 'obsidian';
-import type { PlanItem, PlanSummaryData } from './plan-data';
+import { DAY_PLANNER_DEFAULT_CONTENT, MERMAID_REGEX } from "./constants";
+import { DayPlannerSettings, NoteForDateQuery } from "./settings";
+import type { MarkdownView, Workspace } from "obsidian";
+import type { PlanItem, PlanSummaryData } from "./plan-data";
 
-import type DayPlannerFile from './file';
-import type Parser from './parser';
-import PlannerMermaid from './mermaid';
-import type Progress from './progress';
+import type DayPlannerFile from "./file";
+import type Parser from "./parser";
+import PlannerMermaid from "./mermaid";
+import type Progress from "./progress";
 
 export default class PlannerMarkdown {
-    workspace: Workspace;
-    dayPlannerLastEdit: number;
-    settings: DayPlannerSettings;
-    file: DayPlannerFile;
-    parser: Parser;
-    progress: Progress;
-    mermaid: PlannerMermaid;
-    noteForDateQuery: NoteForDateQuery;
+  workspace: Workspace;
+  dayPlannerLastEdit: number;
+  settings: DayPlannerSettings;
+  file: DayPlannerFile;
+  parser: Parser;
+  progress: Progress;
+  mermaid: PlannerMermaid;
+  noteForDateQuery: NoteForDateQuery;
 
-    constructor(workspace: Workspace, settings: DayPlannerSettings, file: DayPlannerFile, parser: Parser, progress: Progress){
-        this.workspace = workspace;
-        this.settings = settings;
-        this.file = file;
-        this.parser = parser;
-        this.progress = progress;
-        this.mermaid = new PlannerMermaid(this.progress);
-        this.noteForDateQuery = new NoteForDateQuery();
+  constructor(
+    workspace: Workspace,
+    settings: DayPlannerSettings,
+    file: DayPlannerFile,
+    parser: Parser,
+    progress: Progress
+  ) {
+    this.workspace = workspace;
+    this.settings = settings;
+    this.file = file;
+    this.parser = parser;
+    this.progress = progress;
+    this.mermaid = new PlannerMermaid(this.progress);
+    this.noteForDateQuery = new NoteForDateQuery();
+  }
+
+  async insertPlanner() {
+    const filePath = this.file.todayPlannerFilePath();
+    const fileContents = await (
+      await this.file.getFileContents(filePath)
+    ).split("\n");
+    const view = this.workspace.activeLeaf.view as MarkdownView;
+    const currentLine = view.editor.getCursor().line;
+    const insertResult = [
+      ...fileContents.slice(0, currentLine),
+      ...DAY_PLANNER_DEFAULT_CONTENT.split("\n"),
+      ...fileContents.slice(currentLine),
+    ];
+    this.file.updateFile(filePath, insertResult.join("\n"));
+  }
+
+  async parseDayPlanner(filePath: string): Promise<PlanSummaryData> {
+    try {
+      const fileContent = await (
+        await this.file.getFileContents(filePath)
+      ).split("\n");
+      const planData = await this.parser.parseMarkdown(fileContent);
+      return planData;
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    async insertPlanner() {
-        const filePath = this.file.todayPlannerFilePath();
-        const fileContents = await (await this.file.getFileContents(filePath)).split('\n');
-        const view = this.workspace.activeLeaf.view as MarkdownView;
-        const currentLine = view.editor.getCursor().line;
-        const insertResult = [...fileContents.slice(0, currentLine), ...DAY_PLANNER_DEFAULT_CONTENT.split('\n'), ...fileContents.slice(currentLine)];
-        this.file.updateFile(filePath, insertResult.join('\n'));
+  async updateDayPlannerMarkdown(
+    filePath: string,
+    planSummary: PlanSummaryData
+  ) {
+    try {
+      const fileContents = await await this.file.getFileContents(filePath);
+      const fileContentsArr = fileContents.split("\n");
+
+      planSummary.calculate();
+      if (planSummary.empty) {
+        return;
+      }
+      const results = planSummary.items.map((item) => {
+        const result = this.updateItemCompletion(item, item.isPast);
+        return { index: item.matchIndex, replacement: result };
+      });
+
+      results.forEach((result) => {
+        fileContentsArr[result.index] = result.replacement;
+      });
+
+      const fileContentsWithReplacedMermaid = this.replaceMermaid(
+        fileContentsArr.join("\n"),
+        planSummary
+      );
+      if (fileContents !== fileContentsWithReplacedMermaid) {
+        this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
+      }
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    async parseDayPlanner(filePath: string):Promise<PlanSummaryData> {
-        try {
-            const fileContent = await (await this.file.getFileContents(filePath)).split('\n');
-            const planData = await this.parser.parseMarkdown(fileContent);
-            return planData;
-        } catch (error) {
-            console.log(error)
-        }
+  private replaceMermaid(input: string, planSummary: PlanSummaryData): string {
+    const mermaidResult = this.settings.mermaid
+      ? this.mermaid.generate(planSummary) + "\n\n"
+      : "";
+    const noMatch = input.match(MERMAID_REGEX) === null;
+    if (noMatch) {
+      return input.replace(
+        "# Day Planner\n",
+        `# Day Planner\n${mermaidResult}`
+      );
     }
+    const replaced = input.replace(MERMAID_REGEX, mermaidResult);
+    return replaced;
+  }
 
-    async updateDayPlannerMarkdown(filePath: string, planSummary: PlanSummaryData) {
-        try {
-            const fileContents = await (await this.file.getFileContents(filePath))
-            const fileContentsArr = fileContents.split('\n');
-
-            planSummary.calculate();
-            if(planSummary.empty){
-                return;
-            }
-            const results = planSummary.items.map((item) => {
-                const result = this.updateItemCompletion(item, item.isPast);
-                return {index: item.matchIndex, replacement: result};
-            });
-
-            results.forEach(result => {
-                fileContentsArr[result.index] = result.replacement;
-            });
-
-            const fileContentsWithReplacedMermaid = this.replaceMermaid(fileContentsArr.join('\n'), planSummary);
-            if(fileContents !== fileContentsWithReplacedMermaid) {
-                this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
-            }
-        } catch (error) {
-            console.log(error);
-        }
+  private updateItemCompletion(item: PlanItem, complete: boolean) {
+    let check = this.check(complete);
+    // Override to use current (user inputted) state if plugin setting is enabled
+    if (!this.settings.completePastItems) {
+      check = this.check(item.isCompleted);
     }
+    return item.raw.replace(/\[[x ]\]/, `[${check}]`);
+  }
 
-    private replaceMermaid(input: string, planSummary: PlanSummaryData): string{
-        const mermaidResult = this.settings.mermaid ? this.mermaid.generate(planSummary) + '\n\n' : '';
-        const noMatch = input.match(MERMAID_REGEX) === null;
-        if(noMatch) {
-            return input.replace('# Day Planner\n', `# Day Planner\n${mermaidResult}`)
-        }
-        const replaced = input.replace(MERMAID_REGEX, mermaidResult);
-        return replaced;
-    }
+  private check(check: boolean) {
+    return check ? "x" : " ";
+  }
 
-    private updateItemCompletion(item: PlanItem, complete: boolean) {
-        let check = this.check(complete);
-        //Override to use current (user inputted) state if plugin setting is enabled
-        if(!this.settings.completePastItems) {
-            check = this.check(item.isCompleted);
-        }
-        return item.raw.replace(/\[[x ]\]/, `[${check}]`);
+  checkIsDayPlannerEditing() {
+    const activeLeaf = this.workspace.activeLeaf;
+    if (!activeLeaf) {
+      return;
     }
-
-    private check(check: boolean) {
-        return check ? 'x' : ' ';
+    const viewState = activeLeaf.view.getState();
+    if (viewState.file === this.file.todayPlannerFilePath()) {
+      this.dayPlannerLastEdit = new Date().getTime();
     }
-
-    checkIsDayPlannerEditing(){
-        const activeLeaf = this.workspace.activeLeaf;
-        if(!activeLeaf){
-            return;
-        }
-        const viewState = activeLeaf.view.getState();
-        if(viewState.file === this.file.todayPlannerFilePath()){
-            this.dayPlannerLastEdit = new Date().getTime();
-        }
-    }
+  }
 }

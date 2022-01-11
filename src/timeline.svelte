@@ -1,98 +1,97 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { onDestroy } from "svelte";
-    import { planSummary, now, nowPosition, zoomLevel } from './timeline-store';
-    import type { PlanItem, PlanSummaryData } from './plan-data';
-    const moment = (window as any).moment;
+  import { onMount } from 'svelte';
+  import { onDestroy } from "svelte";
+  import { planSummary, now, nowPosition, zoomLevel } from './timeline-store';
+  import type { PlanItem, PlanSummaryData } from './plan-data';
+  const moment = (window as any).moment;
 
-    export let summary: PlanSummaryData;
-    export let rootEl: HTMLElement;
-    let timelineZoomLevel: number;
-    let position: number;
-    let timelineMeterPosition: number;
-    let currentTime: Date;
-    let autoScroll: boolean = true;
+  export let summary: PlanSummaryData;
+  export let rootEl: HTMLElement;
+  let timelineZoomLevel: number;
+  let position: number;
+  let timelineMeterPosition: number;
+  let currentTime: Date;
+  let autoScroll: boolean = true;
 
-    const unsubSummary = planSummary.subscribe(val => {
-        summary = val;
-        updateTimelineMeterPosition();
-    });
+  const unsubSummary = planSummary.subscribe(val => {
+      summary = val;
+      updateTimelineMeterPosition();
+  });
 
-    const unsubPosition = nowPosition.subscribe(val => {
-        position = val;
-    });
+  const unsubPosition = nowPosition.subscribe(val => {
+      position = val;
+  });
 
-    const unsubCurrentTime = now.subscribe(val => {
-        currentTime = val;
-        scrollToPosition(position - 150);
-        if(!timelineZoomLevel) {
-          timelineZoomLevel = 4;
-        }
-    });
-
-    const unsubSettings = zoomLevel.subscribe(val => {
-      timelineZoomLevel = val;
-    });
-
-    onDestroy(unsubSummary);
-    onDestroy(unsubPosition);
-    onDestroy(unsubCurrentTime);
-    onDestroy(unsubSettings);
-    onDestroy(removeScrollListener);
-
-    onMount(() => {
-      addScrollListener();
-    });
-
-    function addScrollListener() {
-      rootEl.addEventListener('scroll', disableAutoScroll);
-    }
-
-    function removeScrollListener() {
-      rootEl.removeEventListener('scroll', disableAutoScroll);
-    }
-
-    function disableAutoScroll(ev:any) {
-      autoScroll = false;
-    }
-
-    function scrollToPosition(position: number) {
-      if(autoScroll && !summary.current?.isEnd) {
-        removeScrollListener();
-        rootEl.scrollTo({ left: 0, top: position, behavior: 'smooth' });
-        setTimeout(addScrollListener, 1000);
+  const unsubCurrentTime = now.subscribe(val => {
+      currentTime = val;
+      scrollToPosition(position - 150);
+      if(!timelineZoomLevel) {
+        timelineZoomLevel = 4;
       }
-    }
+  });
 
-    function updateTimelineMeterPosition() {
-      timelineMeterPosition = summary.empty ? 0 : ((summary.items.first().time.getMinutes()*timelineZoomLevel)*-1) - 1;
-    }
+  const unsubSettings = zoomLevel.subscribe(val => {
+    timelineZoomLevel = val;
+  });
 
-    function shortClass(item: PlanItem) {
-      return item.durationMins < (75/timelineZoomLevel) ? 'short' : '';
-    }
+  onDestroy(unsubSummary);
+  onDestroy(unsubPosition);
+  onDestroy(unsubCurrentTime);
+  onDestroy(unsubSettings);
+  onDestroy(removeScrollListener);
 
-    function pastClass(item: PlanItem) {
-      return item.isPast ? 'past' : '';
-    }
+  onMount(() => {
+    addScrollListener();
+  });
 
+  function addScrollListener() {
+    rootEl.addEventListener('scroll', disableAutoScroll);
+  }
+
+  function removeScrollListener() {
+    rootEl.removeEventListener('scroll', disableAutoScroll);
+  }
+
+  function disableAutoScroll(ev:any) {
+    autoScroll = false;
+  }
+
+  function scrollToPosition(position: number) {
+    if(autoScroll && !summary.current?.isEnd) {
+      removeScrollListener();
+      rootEl.scrollTo({ left: 0, top: position, behavior: 'smooth' });
+      setTimeout(addScrollListener, 1000);
+    }
+  }
+
+  function updateTimelineMeterPosition() {
+    timelineMeterPosition = summary.empty ? 0 : ((summary.items.first().time.getMinutes()*timelineZoomLevel)*-1) - 1;
+  }
+
+  function shortClass(item: PlanItem) {
+    return item.durationMins < (75/timelineZoomLevel) ? 'short' : '';
+  }
+
+  function pastClass(item: PlanItem) {
+    return item.isPast ? 'past' : '';
+  }
 </script>
 
 <style>
 
 #day-planner-timeline-container {
-    position: relative;
+  position: relative;
 
-    --skobeloff: #006466ff;
-    --midnight-green-eagle-green: #065a60ff;
-    --midnight-green-eagle-green-2: #0b525bff;
-    --midnight-green-eagle-green-3: #144552ff;
-    --charcoal: #1b3a4bff;
-    --prussian-blue: #212f45ff;
-    --space-cadet: #272640ff;
-    --dark-purple: #312244ff;
-    --russian-violet: #3e1f47ff;
-    --russian-violet-2: #4d194dff;
+  --skobeloff: #006466ff;
+  --midnight-green-eagle-green: #065a60ff;
+  --midnight-green-eagle-green-2: #0b525bff;
+  --midnight-green-eagle-green-3: #144552ff;
+  --charcoal: #1b3a4bff;
+  --prussian-blue: #212f45ff;
+  --space-cadet: #272640ff;
+  --dark-purple: #312244ff;
+  --russian-violet: #3e1f47ff;
+  --russian-violet-2: #4d194dff;
 }
 
 .aside {
@@ -155,12 +154,12 @@
 }
 
 .event_item{
-    border-bottom: 2px solid var(--background-primary);
-    margin: 0;
-    cursor: pointer;
-    padding: 5px 10px 10px 0;
-    width: 100%;
-    overflow: hidden;
+  border-bottom: 2px solid var(--background-primary);
+  margin: 0;
+  cursor: pointer;
+  padding: 5px 10px 10px 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .event_item.short {
@@ -171,8 +170,8 @@
 }
 
 .event_item:hover{
-    background-color: var(--interactive-accent-hover);
-    box-shadow: 0px 0px 52px -18px rgba(0, 0, 0, 0.75);
+  background-color: var(--interactive-accent-hover);
+  box-shadow: 0px 0px 52px -18px rgba(0, 0, 0, 0.75);
 }
 
 .event_item_color1 {
@@ -220,7 +219,7 @@
 }
 
 .ei_Copy,.ei_Title{
-    color:var(--text-on-accent);
+  color:var(--text-on-accent);
 }
 
 .ei_Dot,.ei_Title{
@@ -253,38 +252,38 @@
 }
 
 .header_title,.ei_Title,.ce_title{
-color:#fff;
+  color:#fff;
 }
 
 #now-line {
-    height: 4px;
-    background-color: darkred;
-    opacity: 80%;
-    position: absolute;
-    z-index: 3;
-    width: 100%;
+  height: 4px;
+  background-color: darkred;
+  opacity: 80%;
+  position: absolute;
+  z-index: 3;
+  width: 100%;
 }
 
 #now-line .timeline-time {
-    position: relative;
-    left: 5px;
-    top: 0;
-    background-color: darkred;
-    color: #fff;
-    padding: 0 4px 2px 4px;
-    border-radius: 0 0 4px 4px;
-    text-align: center;
+  position: relative;
+  left: 5px;
+  top: 0;
+  background-color: darkred;
+  color: #fff;
+  padding: 0 4px 2px 4px;
+  border-radius: 0 0 4px 4px;
+  text-align: center;
 }
 
 #scroll-controls {
-    background-color: var(--background-secondary);
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-    z-index: 4;
-    padding: 8px 15px;
-    text-align: center;
-    height: 45px;
+  background-color: var(--background-secondary);
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 4;
+  padding: 8px 15px;
+  text-align: center;
+  height: 45px;
 }
 
 #scroll-controls label {
@@ -358,7 +357,7 @@ color:#fff;
               <div class="filled__line__completed" style="height: {nowPosition}px;"></div>
           </div>
       </div>
-        
+
       <div class="events">
         {#each summary.items as item, i}
             <div class="event_item event_item_color{i%10+1} {shortClass(item)} {pastClass(item)}" style="height: {item.durationMins*timelineZoomLevel}px;" data-title="{item.rawTime}">
@@ -375,7 +374,7 @@ color:#fff;
 
           <span class="timeline-time">{moment(currentTime).format('HH:mm')}</span>
       </div>
-      
+
       <div id="scroll-controls">
         <label for="auto-scroll">Track time</label>
         <input id="auto-scroll" type="checkbox" class="toggle" bind:checked={autoScroll}>
