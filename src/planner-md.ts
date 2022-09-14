@@ -51,10 +51,35 @@ export default class PlannerMarkdown {
 
   async parseDayPlanner(filePath: string): Promise<PlanSummaryData> {
     try {
-      const fileContent = await (
-        await this.file.getFileContents(filePath)
-      ).split("\n");
-      const planData = await this.parser.parseMarkdown(fileContent);
+      const fileContent = (await this.file.getFileContents(filePath)).split(
+        "\n"
+      );
+      const planContent = [];
+      let state = "stop";
+      let offset = 0;
+      if (this.settings.plannerStartIdentifier == "") {
+        state = "start";
+      }
+      for (let i = 0; i < fileContent.length; i++) {
+        const line = fileContent[i];
+        if (
+          this.settings.plannerEndIdentifier != "" &&
+          line.startsWith(this.settings.plannerEndIdentifier)
+        ) {
+          break;
+        }
+        if (state == "start") {
+          planContent.push(line);
+        } else if (
+          this.settings.plannerStartIdentifier != "" &&
+          line.startsWith(this.settings.plannerStartIdentifier)
+        ) {
+          state = "start";
+          planContent.push(line);
+          offset = i;
+        }
+      }
+      const planData = await this.parser.parseMarkdown(planContent, offset);
       return planData;
     } catch (error) {
       console.log(error);
@@ -68,18 +93,17 @@ export default class PlannerMarkdown {
     try {
       const fileContents = await await this.file.getFileContents(filePath);
       const fileContentsArr = fileContents.split("\n");
-
+      console.log("Updating day planner markdown");
       planSummary.calculate();
       if (planSummary.empty) {
         return;
       }
-      const results = planSummary.items.map((item) => {
-        const result = this.updateItemCompletion(item, item.isPast);
-        return { index: item.matchIndex, replacement: result };
-      });
 
-      results.forEach((result) => {
-        fileContentsArr[result.index] = result.replacement;
+      planSummary.items.forEach((item) => {
+        const result = this.updateItemCompletion(item, item.isPast);
+        console.log(result, item);
+
+        fileContentsArr[item.matchIndex] = result;
       });
 
       const fileContentsWithReplacedMermaid = this.replaceMermaid(
@@ -95,9 +119,11 @@ export default class PlannerMarkdown {
   }
 
   private replaceMermaid(input: string, planSummary: PlanSummaryData): string {
+    console.log("Replacing mermaid");
     const mermaidResult = this.settings.mermaid
       ? this.mermaid.generate(planSummary) + "\n\n"
       : "";
+
     const noMatch = input.match(MERMAID_REGEX) === null;
     if (noMatch) {
       return input.replace(
@@ -106,6 +132,7 @@ export default class PlannerMarkdown {
       );
     }
     const replaced = input.replace(MERMAID_REGEX, mermaidResult);
+
     return replaced;
   }
 

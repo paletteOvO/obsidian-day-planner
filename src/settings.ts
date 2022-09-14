@@ -41,4 +41,6 @@ export class DayPlannerSettings {
   endLabel: string = "END";
   mermaidIdentifier: string = "# Day Planners";
   autoCreateFile: boolean = true;
+  plannerStartIdentifier: string = "";
+  plannerEndIdentifier: string = "";
 }

@@ -133,13 +133,13 @@ export default class DayPlanner extends Plugin {
       window.setInterval(async () => {
         try {
           if (this.file.hasTodayNote()) {
-            // console.log('Active note found, starting file processing')
+            // console.log("Active note found, starting file processing");
             const filePath = this.file.todayPlannerFilePath();
             if (
               !(await this.vault.adapter.exists(filePath, false)) &&
               !this.settings.autoCreateFile
             ) {
-              // console.log('File does not exist, skipping file processing')
+              console.log("File does not exist, skipping file processing");
               return;
             }
             const planSummary = await this.plannerMD.parseDayPlanner(filePath);
@@ -151,7 +151,7 @@ export default class DayPlanner extends Plugin {
             );
             this.timelineView && this.timelineView.update(planSummary);
           } else {
-            // console.log('No active note, skipping file processing')
+            // console.log("No active note, skipping file processing");
           }
         } catch (error) {
           console.log(error);

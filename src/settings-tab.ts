@@ -140,6 +140,30 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName("Planner Start Identifier")
+      .setDesc("Where the planner item started to be counted")
+      .addText((component) =>
+        component
+          .setValue(this.plugin.settings.plannerStartIdentifier)
+          .onChange((value: string) => {
+            this.plugin.settings.plannerStartIdentifier = value;
+            this.plugin.saveData(this.plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Planner End Identifier")
+      .setDesc("Where the planner item stop counting")
+      .addText((component) =>
+        component
+          .setValue(this.plugin.settings.plannerEndIdentifier)
+          .onChange((value: string) => {
+            this.plugin.settings.plannerEndIdentifier = value;
+            this.plugin.saveData(this.plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Status Bar - Circular Progress")
       .setDesc("Display a circular progress bar in the status bar")
       .addToggle((toggle) =>

@@ -12,19 +12,25 @@ export default class Parser {
     this.planItemFactory = new PlanItemFactory(settings);
   }
 
-  async parseMarkdown(fileContent: string[]): Promise<PlanSummaryData> {
-    const parsed = this.parse(fileContent);
+  async parseMarkdown(
+    fileContent: string[],
+    offset: number
+  ): Promise<PlanSummaryData> {
+    const parsed = this.parse(fileContent, offset);
     const transformed = this.transform(parsed);
     return new PlanSummaryData(transformed);
   }
 
-  private parse(input: string[]): { index: number; value: RegExpExecArray }[] {
+  private parse(
+    input: string[],
+    offset: number
+  ): { index: number; value: RegExpExecArray }[] {
     try {
       const matches: { index: number; value: RegExpExecArray }[] = [];
       let match;
       input.forEach((line, i) => {
         while ((match = PLAN_PARSER_REGEX.exec(line))) {
-          matches.push({ index: i, value: match });
+          matches.push({ index: offset + i, value: match });
         }
       });
       return matches;
