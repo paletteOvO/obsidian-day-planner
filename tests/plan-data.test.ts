@@ -19,7 +19,7 @@ describe('plan-data', () => {
     it('should generate PlanItem with given text', () => {
       const factory = new PlanItemFactory(new DayPlannerSettings());
 
-      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreak, isEnd, time, rawTime, text, raw);
+      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreak, isEnd, time, null, rawTime, text, raw);
 
       expect(item.matchIndex).to.eql(matchIndex);
       expect(item.charIndex).to.eql(charIndex);
@@ -39,7 +39,7 @@ describe('plan-data', () => {
       const factory = new PlanItemFactory(settings);
 
       const isBreakOn = true;
-      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreakOn, isEnd, time, rawTime, text, raw);
+      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreakOn, isEnd, time, null, rawTime, text, raw);
 
       expect(item.isBreak).to.eql(isBreakOn);
       expect(item.text).to.eql(settings.breakLabel);
@@ -52,7 +52,7 @@ describe('plan-data', () => {
       const factory = new PlanItemFactory(settings);
 
       const isEndOn = true;
-      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreak, isEndOn, time, rawTime, text, raw);
+      const item = factory.getPlanItem(matchIndex, charIndex, isCompleted, isBreak, isEndOn, time, null, rawTime, text, raw);
 
       expect(item.isEnd).to.eql(isEndOn);
       expect(item.text).to.eql(settings.endLabel);

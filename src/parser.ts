@@ -52,6 +52,14 @@ export default class Parser {
         time.setHours(parseInt(value.groups.hours));
         time.setMinutes(parseInt(value.groups.minutes));
         time.setSeconds(0);
+        let endTime = null as Date | null;
+        if (value.groups.end_time !== undefined) {
+          endTime = new Date();
+          endTime.setHours(parseInt(value.groups.end_hours));
+          endTime.setMinutes(parseInt(value.groups.end_minutes));
+          endTime.setSeconds(0);
+        }
+
         return this.planItemFactory.getPlanItem(
           match.index,
           value.index,
@@ -59,6 +67,7 @@ export default class Parser {
           isBreak,
           isEnd,
           time,
+          endTime,
           `${value.groups.hours.padStart(2, "0")}:${value.groups.minutes}`,
           value.groups.text?.trim(),
           value[0]

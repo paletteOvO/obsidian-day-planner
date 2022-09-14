@@ -10,6 +10,7 @@ export class PlanItem {
   isBreak: boolean;
   isEnd: boolean;
   time: Date;
+  endTime: Date | null;
   durationMins: number;
   rawTime: string;
   text: string;
@@ -22,6 +23,7 @@ export class PlanItem {
     isBreak: boolean,
     isEnd: boolean,
     time: Date,
+    endTime: Date | null,
     rawTime: string,
     text: string,
     raw: string
@@ -33,6 +35,7 @@ export class PlanItem {
     this.isBreak = isBreak;
     this.isEnd = isEnd;
     this.time = time;
+    this.endTime = endTime;
     this.rawTime = rawTime;
     this.text = text;
     this.raw = raw;
@@ -101,6 +104,7 @@ export class PlanItemFactory {
     isBreak: boolean,
     isEnd: boolean,
     time: Date,
+    endTime: Date | null,
     rawTime: string,
     text: string,
     raw: string
@@ -113,6 +117,7 @@ export class PlanItemFactory {
       isBreak,
       isEnd,
       time,
+      endTime,
       rawTime,
       displayText,
       raw

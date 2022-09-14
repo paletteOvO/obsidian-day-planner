@@ -3,7 +3,7 @@ export const DATE_REGEX = /(?<target>{{date:?(?<date>[^}]*)}})/g;
 
 // https://regex101.com/r/YWWsJU/1
 export const PLAN_PARSER_REGEX =
-  /^(?<check>\s*-\s*\[(?<completion>[x ])\]\s*)(?<hours>\d{1,2}):(?<minutes>\d{1,2})\s*(?<text>.*)$/gim;
+  /^(?<check>\s*-\s*\[(?<completion>[x ])\]\s*)(?<hours>\d{1,2}):(?<minutes>\d{1,2})(?<end_time>-(?<end_hours>\d{1,2}):(?<end_minutes>\d{1,2}))?\s*(?<text>.*)$/gim;
 
 export const MERMAID_REGEX = /```mermaid\ngantt[\S\s]*?```\s*/gim;
 
