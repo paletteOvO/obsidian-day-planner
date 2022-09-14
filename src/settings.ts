@@ -40,4 +40,5 @@ export class DayPlannerSettings {
   breakLabel: string = "BREAK";
   endLabel: string = "END";
   mermaidIdentifier: string = "# Day Planners";
+  autoCreateFile: boolean = true;
 }

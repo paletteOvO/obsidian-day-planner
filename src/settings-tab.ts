@@ -73,6 +73,20 @@ export class DayPlannerSettingsTab extends PluginSettingTab {
     );
 
     new Setting(containerEl)
+      .setName("Auto create Day Planner File")
+      .setDesc(
+        "will create a new Day Planner file for the current day if it doesn't exist"
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.autoCreateFile)
+          .onChange((value: boolean) => {
+            this.plugin.settings.autoCreateFile = value;
+            this.plugin.saveData(this.plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Day Planner Templater File")
       .setDesc(
         "Templater File (require templater plugin, will use default template if empty)"

@@ -135,6 +135,13 @@ export default class DayPlanner extends Plugin {
           if (this.file.hasTodayNote()) {
             // console.log('Active note found, starting file processing')
             const filePath = this.file.todayPlannerFilePath();
+            if (
+              !(await this.vault.adapter.exists(filePath, false)) &&
+              !this.settings.autoCreateFile
+            ) {
+              // console.log('File does not exist, skipping file processing')
+              return;
+            }
             const planSummary = await this.plannerMD.parseDayPlanner(filePath);
             planSummary.calculate();
             await this.statusBar.refreshStatusBar(planSummary);
@@ -186,6 +193,7 @@ export default class DayPlanner extends Plugin {
       const dayPlannerExists = this.notesForDatesQuery.exists(
         this.settings.notesToDates
       );
+
       const activeDayPlannerPath = this.notesForDatesQuery.active(
         this.settings.notesToDates
       ).notePath;
