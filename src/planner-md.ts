@@ -1,6 +1,7 @@
 import { DAY_PLANNER_DEFAULT_CONTENT, MERMAID_REGEX } from "./constants";
 import { DayPlannerSettings, NoteForDateQuery } from "./settings";
-import type { MarkdownView, Workspace } from "obsidian";
+import { MarkdownView, Workspace } from "obsidian";
+
 import type { PlanItem, PlanSummaryData } from "./plan-data";
 
 import type DayPlannerFile from "./file";
@@ -36,9 +37,10 @@ export default class PlannerMarkdown {
 
   async insertPlanner() {
     const filePath = this.file.todayPlannerFilePath();
-    const fileContents = await (
-      await this.file.getFileContents(filePath)
-    ).split("\n");
+
+    const fileContents = (await this.file.getFileContents(filePath)).split(
+      "\n"
+    );
     const view = this.workspace.activeLeaf.view as MarkdownView;
     const currentLine = view.editor.getCursor().line;
     const insertResult = [
@@ -91,9 +93,8 @@ export default class PlannerMarkdown {
     planSummary: PlanSummaryData
   ) {
     try {
-      const fileContents = await await this.file.getFileContents(filePath);
+      const fileContents = await this.file.getFileContents(filePath);
       const fileContentsArr = fileContents.split("\n");
-      console.log("Updating day planner markdown");
       planSummary.calculate();
       if (planSummary.empty) {
         return;
@@ -101,8 +102,6 @@ export default class PlannerMarkdown {
 
       planSummary.items.forEach((item) => {
         const result = this.updateItemCompletion(item, item.isPast);
-        console.log(result, item);
-
         fileContentsArr[item.matchIndex] = result;
       });
 
@@ -110,8 +109,42 @@ export default class PlannerMarkdown {
         fileContentsArr.join("\n"),
         planSummary
       );
+      const fileContentsArrWithReplacedMermaid =
+        fileContentsWithReplacedMermaid.split("\n");
+
       if (fileContents !== fileContentsWithReplacedMermaid) {
-        this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
+        const active_view = this.workspace.getActiveViewOfType(MarkdownView);
+        let diffIndex = undefined as number | undefined;
+        if (active_view !== null && active_view.file.path == filePath) {
+          const doc = active_view.editor.getDoc();
+          const pos = doc.getCursor();
+          const minLength = Math.min(
+            fileContentsArr.length,
+            fileContentsArrWithReplacedMermaid.length
+          );
+          for (let i = 0; i < minLength; i++) {
+            if (fileContentsArr[i] !== fileContentsArrWithReplacedMermaid[i]) {
+              diffIndex = i;
+              break;
+            }
+          }
+
+          if (diffIndex !== undefined) {
+            this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
+            return;
+          }
+
+          if (diffIndex < pos.line) {
+            pos.line +=
+              fileContentsArrWithReplacedMermaid.length -
+              fileContentsArr.length;
+          }
+
+          active_view.editor.getDoc().setValue(fileContentsWithReplacedMermaid);
+          doc.setCursor(pos.line, pos.ch);
+        } else {
+          this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -119,7 +152,6 @@ export default class PlannerMarkdown {
   }
 
   private replaceMermaid(input: string, planSummary: PlanSummaryData): string {
-    console.log("Replacing mermaid");
     const mermaidResult = this.settings.mermaid
       ? this.mermaid.generate(planSummary) + "\n\n"
       : "";
