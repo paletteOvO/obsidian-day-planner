@@ -150,12 +150,14 @@ export default class PlannerMarkdown {
       : "";
 
     const noMatch = input.match(MERMAID_REGEX) === null;
+
     if (noMatch) {
       return input.replace(
         `${this.settings.mermaidIdentifier}\n`,
         `${this.settings.mermaidIdentifier}\n${mermaidResult}`
       );
     }
+
     const replaced = input.replace(
       MERMAID_REGEX,
       (_match, offset, _string, _groups) => {
@@ -170,16 +172,13 @@ export default class PlannerMarkdown {
   }
 
   private updateItemCompletion(item: PlanItem, complete: boolean) {
-    let check = this.check(complete);
+    let check = complete ? "x" : " ";
     // Override to use current (user inputted) state if plugin setting is enabled
     if (!this.settings.completePastItems) {
-      check = this.check(item.isCompleted);
+      check = item.isCompleted ? "x" : " ";
     }
-    return item.raw.replace(/\[[x ]\]/, `[${check}]`);
-  }
 
-  private check(check: boolean) {
-    return check ? "x" : " ";
+    return item.raw.replace(/\[[x ]\]/, `[${check}]`);
   }
 
   checkIsDayPlannerEditing() {

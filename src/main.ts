@@ -59,7 +59,20 @@ export default class DayPlanner extends Plugin {
     );
 
     this.statusBar.initStatusBar();
-    this.registerEvent(this.app.vault.on("modify", this.codeMirror, ""));
+    this.registerEvent(
+      this.app.vault.on(
+        "modify",
+        (_file: TAbstractFile) => {
+          if (this.file.hasTodayNote()) {
+            // console.log('Active note found, starting CodeMirror monitoring')
+            this.plannerMD.checkIsDayPlannerEditing();
+          } else {
+            // console.log('No active note, skipping CodeMirror monitoring')
+          }
+        },
+        ""
+      )
+    );
 
     this.addCommand({
       id: "app:add-day-planner-to-note",
@@ -238,15 +251,6 @@ export default class DayPlanner extends Plugin {
       console.error(error);
     }
   }
-
-  codeMirror = (file: TAbstractFile) => {
-    if (this.file.hasTodayNote()) {
-      // console.log('Active note found, starting CodeMirror monitoring')
-      this.plannerMD.checkIsDayPlannerEditing();
-    } else {
-      // console.log('No active note, skipping CodeMirror monitoring')
-    }
-  };
 
   onunload() {
     console.log("Unloading Day Planner plugin");
