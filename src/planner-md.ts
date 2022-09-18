@@ -105,42 +105,31 @@ export default class PlannerMarkdown {
         fileContentsArr[item.matchIndex] = result;
       });
 
+      const mermaidOffset = [] as number[];
       const fileContentsWithReplacedMermaid = this.replaceMermaid(
         fileContentsArr.join("\n"),
-        planSummary
+        planSummary,
+        mermaidOffset
       );
-      const fileContentsArrWithReplacedMermaid =
-        fileContentsWithReplacedMermaid.split("\n");
 
       if (fileContents !== fileContentsWithReplacedMermaid) {
         const active_view = this.workspace.getActiveViewOfType(MarkdownView);
-        let diffIndex = undefined as number | undefined;
         if (active_view !== null && active_view.file.path == filePath) {
           const doc = active_view.editor.getDoc();
           const pos = doc.getCursor();
-          const minLength = Math.min(
-            fileContentsArr.length,
-            fileContentsArrWithReplacedMermaid.length
-          );
-          for (let i = 0; i < minLength; i++) {
-            if (fileContentsArr[i] !== fileContentsArrWithReplacedMermaid[i]) {
-              diffIndex = i;
-              break;
-            }
-          }
-
-          if (diffIndex !== undefined) {
-            this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
-            return;
-          }
-
-          if (diffIndex < pos.line) {
-            pos.line +=
-              fileContentsArrWithReplacedMermaid.length -
-              fileContentsArr.length;
-          }
+          const offset = doc.posToOffset(pos);
 
           active_view.editor.getDoc().setValue(fileContentsWithReplacedMermaid);
+
+          if (mermaidOffset[0] < offset) {
+            const target_offset =
+              offset +
+              fileContentsWithReplacedMermaid.length -
+              fileContents.length;
+            const target_pos = doc.offsetToPos(target_offset);
+            pos.line = target_pos.line;
+          }
+
           doc.setCursor(pos.line, pos.ch);
         } else {
           this.file.updateFile(filePath, fileContentsWithReplacedMermaid);
@@ -151,7 +140,11 @@ export default class PlannerMarkdown {
     }
   }
 
-  private replaceMermaid(input: string, planSummary: PlanSummaryData): string {
+  private replaceMermaid(
+    input: string,
+    planSummary: PlanSummaryData,
+    offset_out?: number[]
+  ): string {
     const mermaidResult = this.settings.mermaid
       ? this.mermaid.generate(planSummary) + "\n\n"
       : "";
@@ -163,7 +156,15 @@ export default class PlannerMarkdown {
         `${this.settings.mermaidIdentifier}\n${mermaidResult}`
       );
     }
-    const replaced = input.replace(MERMAID_REGEX, mermaidResult);
+    const replaced = input.replace(
+      MERMAID_REGEX,
+      (_match, offset, _string, _groups) => {
+        if (offset_out !== undefined) {
+          offset_out.push(offset);
+        }
+        return mermaidResult;
+      }
+    );
 
     return replaced;
   }
