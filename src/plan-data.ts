@@ -5,7 +5,7 @@ const moment = (window as any).moment;
 export class PlanItem {
   matchIndex: number;
   charIndex: number;
-  isCompleted: boolean;
+  isCompleted: boolean | null;
   isPast: boolean;
   isBreak: boolean;
   isEnd: boolean;
@@ -19,7 +19,7 @@ export class PlanItem {
   constructor(
     matchIndex: number,
     charIndex: number,
-    isCompleted: boolean,
+    isCompleted: boolean | null,
     isBreak: boolean,
     isEnd: boolean,
     time: Date,

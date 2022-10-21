@@ -45,7 +45,12 @@ export default class Parser {
     const results = regexMatches.map((match) => {
       try {
         const value = match.value;
-        const isCompleted = this.matchValue(value.groups.completion, "x");
+        const hasCheck = match.value.groups.check != "";
+        const isCompleted =
+          match.value.groups.check != ""
+            ? this.matchValue(value.groups.completion, "x")
+            : null;
+
         const isBreak = this.matchValue(
           value.groups.text,
           this.settings.breakLabel
